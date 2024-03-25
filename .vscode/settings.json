@@ -1,0 +1,26 @@
+{
+    "[python]": {
+        "editor.formatOnType": true,
+    },
+    "python.defaultInterpreterPath": "/gwpool/users/gpizzati/mambaforge/envs/test_uproot/bin/python",
+    "python.analysis.extraPaths": [
+        "my_processor"
+    ],
+    "python.languageServer": "Pylance",
+    "flake8.args": [
+        "--config=setup.cfg"
+    ],
+    "black-formatter.args": [
+        "--config=pyproject.toml"
+    ],
+    "autoDocstring.startOnNewLine": true,
+    "autoDocstring.docstringFormat": "numpy",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+    }
+}
