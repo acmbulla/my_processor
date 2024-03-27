@@ -28,7 +28,12 @@ cfg = {
         "ecalBadCalibFilter",
         "eeBadScFilter",
     ],
+    "eleWP": "mvaFall17V1Iso_WP90",
+    "muWP": "cut_Tight_HWWW",
+    "puWeightsKey": "Collisions18_UltraLegacy_goldenJSON"
 }
+
+
 basedir = os.path.abspath(".") + "/data/2018/jme/"
 os.makedirs(basedir, exist_ok=True)
 

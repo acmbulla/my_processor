@@ -11,7 +11,7 @@ def puid_sf(events, variations, ceval_puid):
     jet_genmatched = (events.Jet.genJetIdx >= 0) & (
         events.Jet.genJetIdx < ak.num(events.GenJet)
     )
-    mask = jet_genmatched & pass_puId & (events.Jet.pt < 50.0)
+    mask = jet_genmatched & pass_puId & (15.0 < events.Jet.pt < 50.0)
     jets = ak.mask(events.Jet, mask)
     sf = wrap_c(jets.eta, jets.pt, "nom", "L")
     sf_up = wrap_c(jets.eta, jets.pt, "up", "L")

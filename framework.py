@@ -26,21 +26,25 @@ def read_events(filename, start=0, stop=100, read_form={}):
     stop = min(stop, tree.num_entries)
     if start >= stop:
         return ak.Array([])
+
+    branches = [k.name for k in tree.branches]
+
     events = {}
     form = deepcopy(read_form)
+
     for coll in form:
-        # print(coll)
         d = {}
         coll_branches = form[coll].pop("branches")
-        # print(coll_branches)
 
         if len(coll_branches) == 0:
-            # print(f"Collection {coll} is not a collection but a signle branch")
-            events[coll] = read_array(tree, coll, start, stop)
+            if coll in branches:
+                events[coll] = read_array(tree, coll, start, stop)
             continue
 
         for branch in coll_branches:
-            d[branch] = read_array(tree, coll + "_" + branch, start, stop)
+            branch_name = coll + "_" + branch
+            if branch_name in branches:
+                d[branch] = read_array(tree, branch_name, start, stop)
 
         if len(d.keys()) == 0:
             print("did not find anything for", coll, file=sys.stderr)

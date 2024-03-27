@@ -6,7 +6,7 @@ import os
 from math import ceil
 
 if __name__ == "__main__":
-    with open("data/forms.json", "r") as file:
+    with open("data/common/forms.json", "r") as file:
         forms = json.load(file)
     with open("data/chunks.json", "r") as file:
         new_chunks = json.load(file)

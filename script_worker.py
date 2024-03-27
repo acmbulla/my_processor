@@ -1,27 +1,27 @@
 import hist
-
 import awkward as ak
-
 import uproot
-
 import vector
 import coffea
+import correctionlib
+from coffea.lumi_tools import LumiMask
+
 
 from framework import add_dict, big_process
 from modules.basic_selections import lumi_mask, pass_flags, pass_trigger
 from modules.jet_sel import cleanJet, jetSel
 from modules.jme import getJetCorrections, correct_jets
-from modules.lepton_sel import create_lepton, selectElectron, selectMuon
+from modules.lepton_sel import createLepton, leptonSel
 from modules.prompt_gen import prompt_gen_match_leptons
 from modules.puid import puid_sf
 from modules.btag import btag_sf
 
-import correctionlib
-from coffea.lumi_tools import LumiMask
 import cloudpickle
 import zlib
 import sys
 import json
+
+from modules.puweight import puweight_sf
 
 vector.register_awkward()
 
@@ -40,10 +40,10 @@ ceval_puWeight = correctionlib.CorrectionSet.from_file(cfg["puWeights"])
 
 
 def process(events, **kwargs):
-    # read_form = kwargs.get("read_form", {})
     dataset = kwargs["dataset"]
     trigger_sel = kwargs.get("trigger_sel", "")
     isData = kwargs.get("is_data", False)
+
     variations = {}
     variations["nom"] = (0,)
 
@@ -61,23 +61,21 @@ def process(events, **kwargs):
     sumw = ak.sum(events.weight)
     nevents = ak.num(events.weight, axis=0)
 
-    events[("Muon", "mass")] = ak.zeros_like(events.Muon.pt)
-    events[("Electron", "mass")] = ak.zeros_like(events.Electron.pt)
-
+    # pass trigger and flags
     events = pass_trigger(events, cfg["tgr_data"])
     events = pass_flags(events, cfg["flags"])
 
     events = events[events.pass_flags & events.pass_trigger]
 
     if isData:
+        # each data DataSet has its own trigger_sel
         events = events[eval(trigger_sel)]
 
     events = jetSel(events)
 
-    events["Electron"] = selectElectron(events.Electron)
-    events["Muon"] = selectMuon(events.Muon)
-    events = create_lepton(events)
+    events = createLepton(events)
     events["Lepton"] = events.Lepton[events.Lepton.pt > 10]
+    events = leptonSel(events)
 
     if not isData:
         events = prompt_gen_match_leptons(events)
@@ -91,12 +89,18 @@ def process(events, **kwargs):
 
     # MCCorr
     # Should load SF and corrections here
+
+    # FIXME add rochester
+
     if not isData:
+
+        # FIXME add trigger SF
+
+        # FIXME add LeptonSF
+
         # correct jets
         jec_stack = getJetCorrections(cfg)
         events, variations = correct_jets(events, variations, jec_stack)
-        # reapply jetSel to remove jets that have a low pt after jec + jer
-        events = jetSel(events)
 
         # puId SF
         events, variations = puid_sf(events, variations, ceval_puid)
@@ -105,11 +109,10 @@ def process(events, **kwargs):
         events, variations = btag_sf(events, variations, ceval_btag, cfg)
 
         # puWeight
-        events["puWeight"] = ceval_puWeight[
-            "Collisions18_UltraLegacy_goldenJSON"
-        ].evaluate(events.Pileup.nTrueInt, "nominal")
+        events, variations = puweight_sf(events, variations, ceval_puWeight, cfg)
         events["weight"] = events.weight * events.puWeight
 
+        # Theory unc.
         nVariations = len(events.LHEScaleWeight[0])
         for i, j in enumerate(
             [
@@ -137,39 +140,60 @@ def process(events, **kwargs):
                 (f"weight_pdfWeight_{i}",),
             )
 
-    # events = events[(ak.num(events.Lepton, axis=1) >= 2)]
+    # Define histograms
+    axis = {
+        "mjj": hist.axis.Regular(30, 200, 1500, name="mjj"),
+        "mll": hist.axis.Regular(20, 91 - 15, 91 + 15, name="mll"),
+    }
 
-    events["ee"] = (events.Lepton[:, 0].pdgId * events.Lepton[:, 1].pdgId) == -11 * 11
-    events["mm"] = (events.Lepton[:, 0].pdgId * events.Lepton[:, 1].pdgId) == -13 * 13
-
-    axis = [
-        hist.axis.Regular(30, 200, 1500, name="mjj"),
-        hist.axis.Regular(20, 91 - 15, 91 + 15, name="mll"),
+    default_axis = [
         hist.axis.StrCategory(["ee", "mm"], name="category"),
         hist.axis.StrCategory(sorted(list(variations.keys())), name="syst"),
     ]
 
-    h = hist.Hist(
-        *axis,
-        hist.storage.Weight(),
-    )
+    histos = {}
+    for variable in axis:
+        histos[variable] = hist.Hist(
+            axis[variable],
+            *default_axis,
+            hist.storage.Weight(),
+        )
 
     originalEvents = events[:]
 
     print("Doing variations")
     for variation in sorted(list(variations.keys())):
         events = originalEvents[:]
-        # print(variation, events.weight[:10], file=sys.stderr)
 
         if len(variations[variation]) == 2:
             variation_dest, variation_source = variations[variation]
             events[variation_dest] = events[variation_source]
 
-        events["Jet"] = events.Jet[events.Jet.pt >= 30]
+        # l2tight
+        events = events[(ak.num(events.Lepton, axis=1) >= 2)]
 
-        events = events[
-            (ak.num(events.Lepton, axis=1) >= 2) & (ak.num(events.Jet, axis=1) >= 2)
-        ]
+        eleWP = cfg["eleWP"]
+        muWP = cfg["muWP"]
+
+        comb = ak.ones_like(events.run) == 1.0
+        for ilep in range(2):
+            comb = comb & (
+                events.Lepton[:, ilep]["isTightElectron_" + eleWP]
+                | events.Lepton[:, ilep]["isTightMuon_" + muWP]
+            )
+        events = events[comb]
+
+        # reapply jetSel to remove jets that have a low pt after jec + jer
+        events = jetSel(events)
+        events["Jet"] = events.Jet[events.Jet.pt >= 30]
+        events = events[(ak.num(events.Jet, axis=1) >= 2)]
+
+        events["ee"] = (
+            events.Lepton[:, 0].pdgId * events.Lepton[:, 1].pdgId
+        ) == -11 * 11
+        events["mm"] = (
+            events.Lepton[:, 0].pdgId * events.Lepton[:, 1].pdgId
+        ) == -13 * 13
 
         if not isData:
             events = events[
@@ -203,17 +227,17 @@ def process(events, **kwargs):
         events["mll"] = (events.Lepton[:, 0] + events.Lepton[:, 1]).mass
         events = events[(abs(events.mll - 91) < 15) & (events.mjj > 200)]
 
-        for category in ["ee", "mm"]:
-            mask = events[category]
-            h.fill(
-                mjj=events.mjj[mask],
-                mll=events.mll[mask],
-                category=category,
-                syst=variation,
-                weight=events.weight[mask],
-            )
+        for variable in histos:
+            for category in ["ee", "mm"]:
+                mask = events[category]
+                histos[variable].fill(
+                    events[variable][mask],
+                    category=category,
+                    syst=variation,
+                    weight=events.weight[mask],
+                )
 
-    return {dataset: {"sumw": sumw, "nevents": nevents, "h": h}}
+    return {dataset: {"sumw": sumw, "nevents": nevents, "h": histos}}
 
 
 if __name__ == "__main__":
