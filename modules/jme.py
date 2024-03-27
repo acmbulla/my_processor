@@ -57,17 +57,18 @@ def correct_jets(events, variations, jec_stack):
     print(br)
     for variation in br:
         for tag in ["up", "down"]:
+            pt_sort = ak.argsort(corrected_jets[(variation, tag, 'pt')], ascending=False, axis=-1)
             for variable in ["pt"]:
                 new_branch_name = f"{variable}_{variation}_{tag}"
                 events[("Jet", new_branch_name)] = corrected_jets[
                     (variation, tag, variable)
-                ]
+                ][pt_sort]
                 variations[f"{variation}_{tag}"] = (
                     ("Jet", variable),
                     ("Jet", new_branch_name),
                 )
 
     events[("Jet", "pt_orig")] = corrected_jets.pt_orig
-    events[("Jet", "pt")] = corrected_jets.pt_jec
+    events[("Jet", "pt")] = ak.sort(corrected_jets.pt_jec, ascending=False, axis=-1)
     # events[('Jet', 'trueGenJetIdx')] = None
     return events, variations

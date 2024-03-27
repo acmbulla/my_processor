@@ -6,7 +6,7 @@ import subprocess
 import cloudpickle
 import zlib
 
-result_files = glob.glob("results/results_*.pkl")
+result_files = glob.glob("results/results_job_*.pkl")
 
 
 def read_results(filename):
@@ -37,6 +37,13 @@ for i, result_file in enumerate(result_files[:]):
 
     errors += result["errors"]
 
+print([results[dataset]["sumw"] for dataset in results])
+print(len(errors))
+for error in errors:
+    print(error["dataset"], error["error"])
+write_results("results/results_merged.pkl", {"results": results, "errors": errors})
+
+sys.exit(1)
 
 proc = subprocess.Popen("rm results/results_job_*", shell=True)
 proc.wait()

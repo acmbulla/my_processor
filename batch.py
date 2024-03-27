@@ -6,33 +6,16 @@ import os
 from math import ceil
 
 if __name__ == "__main__":
+    with open("data/forms.json", "r") as file:
+        forms = json.load(file)
     with open("data/chunks.json", "r") as file:
-        chunks = json.load(file)
+        new_chunks = json.load(file)
 
-    maxfiles = 100000
-    # for dataset in chunks:
-    new_chunks = []
-    # for dataset in ["DY", 'Zjj', 'Double']:
-    for dataset in ["DY", "SingleMuon", "DoubleMuon", "MuonEG"]:
-        meta = chunks[dataset]["metadata"]
-        ifile = 0
-        for file in chunks[dataset]["files"]:
-            for step in chunks[dataset]["files"][file]["steps"]:
-                print(step)
-                start, stop = step
-                # result = big_process(file, start, stop, dataset=dataset, **meta)
-                new_chunks.append(
-                    dict(filename=file, start=start, stop=stop, dataset=dataset, **meta)
-                )
-                # break
-            ifile += 1
-            if ifile >= maxfiles:
-                break
+    for i, chunk in enumerate(new_chunks):
+        new_chunks[i]["read_form"] = forms[chunk["read_form"]]
 
     print("N chunks", len(new_chunks))
-    # maxjobs = 200
-    # chunks_per_job = ceil(len(new_chunks)/maxjobs)
-    chunks_per_job = 10
+    chunks_per_job = 100
     njobs = ceil(len(new_chunks) / chunks_per_job)
     print("Chunks per job", chunks_per_job)
     print("Number of jobs", njobs)
@@ -50,7 +33,10 @@ if __name__ == "__main__":
     folders = []
     path = os.path.abspath(".")
 
-    proc = subprocess.Popen("rm -r condor; rm -r results", shell=True)
+    proc = subprocess.Popen(
+        "rm -r condor_backup results_backup; mv condor condor_backup; mv results results_backup",
+        shell=True,
+    )
     proc.wait()
 
     for i, job in enumerate(jobs):
@@ -103,7 +89,7 @@ if __name__ == "__main__":
     with open("condor/submit.jdl", "w") as file:
         file.write(txtjdl)
 
-    proc = subprocess.Popen(
-        "mkdir -p results; cd condor/; condor_submit submit.jdl; cd -", shell=True
-    )
+    command = "mkdir -p results; cd condor/; condor_submit submit.jdl; cd -"
+    command = "mkdir -p results"
+    proc = subprocess.Popen(command, shell=True)
     proc.wait()

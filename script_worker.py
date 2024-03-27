@@ -31,7 +31,7 @@ print("awkward version", ak.__version__)
 print("coffea version", coffea.__version__)
 
 
-with open("data/cfg.json") as file:
+with open("cfg.json") as file:
     cfg = json.load(file)
 
 ceval_puid = correctionlib.CorrectionSet.from_file(cfg["puidSF"])
@@ -55,7 +55,7 @@ def process(events, **kwargs):
         events["weight"] = events.genWeight
 
     if isData:
-        lumimask = LumiMask(basedir + cfg["lumiMask"])
+        lumimask = LumiMask(cfg["lumiMask"])
         events = lumi_mask(events, lumimask)
 
     sumw = ak.sum(events.weight)
@@ -88,10 +88,6 @@ def process(events, **kwargs):
     events = events[
         (ak.num(events.Lepton, axis=1) >= 2) & (ak.num(events.Jet, axis=1) >= 2)
     ]
-    if not isData:
-        events = events[
-            events.Lepton[:, 0].promptgenmatched & events.Lepton[:, 1].promptgenmatched
-        ]
 
     # MCCorr
     # Should load SF and corrections here
@@ -132,6 +128,7 @@ def process(events, **kwargs):
                 ("weight",),
                 (f"weight_qcdScale_{i}",),
             )
+
         nVariations = len(events.LHEPdfWeight[0])
         for i, j in enumerate(range(nVariations)):
             events[f"weight_pdfWeight_{i}"] = events.weight * events.LHEPdfWeight[:, j]
@@ -139,10 +136,6 @@ def process(events, **kwargs):
                 ("weight",),
                 (f"weight_pdfWeight_{i}",),
             )
-
-    events = events[
-        (ak.num(events.Lepton, axis=1) >= 2) & (ak.num(events.Jet, axis=1) >= 2)
-    ]
 
     # events = events[(ak.num(events.Lepton, axis=1) >= 2)]
 
@@ -172,6 +165,18 @@ def process(events, **kwargs):
             variation_dest, variation_source = variations[variation]
             events[variation_dest] = events[variation_source]
 
+        events["Jet"] = events.Jet[events.Jet.pt >= 30]
+
+        events = events[
+            (ak.num(events.Lepton, axis=1) >= 2) & (ak.num(events.Jet, axis=1) >= 2)
+        ]
+
+        if not isData:
+            events = events[
+                events.Lepton[:, 0].promptgenmatched
+                & events.Lepton[:, 1].promptgenmatched
+            ]
+
         # Analysis level cuts
         leptoncut = events.ee | events.mm
         leptoncut = leptoncut & (
@@ -185,14 +190,14 @@ def process(events, **kwargs):
             )
         )
         leptoncut = (
-            leptoncut & (events.Lepton[:, 0].pt > 25) & (events.Lepton[:, 1].pt > 13)
+            leptoncut & (events.Lepton[:, 0].pt > 25) & (events.Lepton[:, 1].pt > 15)
         )
         events = events[leptoncut]
 
         if not isData:
             events["PUID_SF"] = ak.prod(events.Jet.PUID_SF, axis=1)
             events["btagSF"] = ak.prod(events.Jet.btagSF_deepjet_shape, axis=1)
-            events["weight"] = events.weight * events.btagSF
+            events["weight"] = events.weight * events.btagSF * events.PUID_SF
 
         events["mjj"] = (events.Jet[:, 0] + events.Jet[:, 1]).mass
         events["mll"] = (events.Lepton[:, 0] + events.Lepton[:, 1]).mass
@@ -212,7 +217,7 @@ def process(events, **kwargs):
 
 
 if __name__ == "__main__":
-    with open("condor/job_0/chunks_job.pkl", "rb") as file:
+    with open("chunks_job.pkl", "rb") as file:
         new_chunks = cloudpickle.loads(zlib.decompress(file.read()))
     print("N chunks to process", len(new_chunks))
 
