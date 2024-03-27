@@ -10,18 +10,22 @@ from coffea.lumi_tools import LumiMask
 from framework import add_dict, big_process
 from modules.basic_selections import lumi_mask, pass_flags, pass_trigger
 from modules.jet_sel import cleanJet, jetSel
-from modules.jme import getJetCorrections, correct_jets
 from modules.lepton_sel import createLepton, leptonSel
 from modules.prompt_gen import prompt_gen_match_leptons
-from modules.puid import puid_sf
-from modules.btag import btag_sf
+
+from modules.lepton_sf import lepton_sf
+from modules.jme import getJetCorrections, correct_jets
+from modules.puid_sf import puid_sf
+from modules.btag_sf import btag_sf
+from modules.puweight import puweight_sf
+from modules.rochester import correctRochester, getRochester
 
 import cloudpickle
 import zlib
 import sys
 import json
+import traceback as tb
 
-from modules.puweight import puweight_sf
 
 vector.register_awkward()
 
@@ -37,6 +41,8 @@ with open("cfg.json") as file:
 ceval_puid = correctionlib.CorrectionSet.from_file(cfg["puidSF"])
 ceval_btag = correctionlib.CorrectionSet.from_file(cfg["btagSF"])
 ceval_puWeight = correctionlib.CorrectionSet.from_file(cfg["puWeights"])
+jec_stack = getJetCorrections(cfg)
+rochester = getRochester(cfg)
 
 
 def process(events, **kwargs):
@@ -80,9 +86,10 @@ def process(events, **kwargs):
     if not isData:
         events = prompt_gen_match_leptons(events)
 
+    # FIXME should clean from only tight / loose?
     events = cleanJet(events)
 
-    # l2tight
+    # Require at least two loose leptons and loose jets
     events = events[
         (ak.num(events.Lepton, axis=1) >= 2) & (ak.num(events.Jet, axis=1) >= 2)
     ]
@@ -90,16 +97,19 @@ def process(events, **kwargs):
     # MCCorr
     # Should load SF and corrections here
 
-    # FIXME add rochester
+    # Correct Muons with rochester
+    events = correctRochester(events, isData, rochester)
 
     if not isData:
 
         # FIXME add trigger SF
 
         # FIXME add LeptonSF
+        events, variations = lepton_sf(events, variations, cfg)
 
-        # correct jets
-        jec_stack = getJetCorrections(cfg)
+        # Jets corrections
+
+        # JEC + JER + JES
         events, variations = correct_jets(events, variations, jec_stack)
 
         # puId SF
@@ -113,6 +123,8 @@ def process(events, **kwargs):
         events["weight"] = events.weight * events.puWeight
 
         # Theory unc.
+
+        # QCD Scale
         nVariations = len(events.LHEScaleWeight[0])
         for i, j in enumerate(
             [
@@ -132,6 +144,7 @@ def process(events, **kwargs):
                 (f"weight_qcdScale_{i}",),
             )
 
+        # Pdf Weights
         nVariations = len(events.LHEPdfWeight[0])
         for i, j in enumerate(range(nVariations)):
             events[f"weight_pdfWeight_{i}"] = events.weight * events.LHEPdfWeight[:, j]
@@ -253,8 +266,9 @@ if __name__ == "__main__":
             results = add_dict(results, result)
         except Exception as e:
             print("\n\nError for chunk", new_chunk, file=sys.stderr)
-            print(e, file=sys.stderr)
-            errors.append(dict(**new_chunk, error=e))
+            nice_exception = "".join(tb.format_exception(None, e, e.__traceback__))
+            print(nice_exception, file=sys.stderr)
+            errors.append(dict(**new_chunk, error=nice_exception))
 
     print("Results", results)
     print("Errors", errors)

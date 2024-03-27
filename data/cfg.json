@@ -29,7 +29,7 @@
     "ecalBadCalibFilter",
     "eeBadScFilter"
   ],
-  "eleWP": "mvaFall17V1Iso_WP90",
+  "eleWP": "mvaFall17V2Iso_WP90",
   "muWP": "cut_Tight_HWWW",
   "puWeightsKey": "Collisions18_UltraLegacy_goldenJSON",
   "JME": {
@@ -56,5 +56,6 @@
   "puidSF": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/clib/jmar.json.gz",
   "btagSF": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/clib/btagging.json.gz",
   "puWeights": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/clib/puWeights.json.gz",
-  "lumiMask": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/lumimasks/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"
+  "lumiMask": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/lumimasks/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt",
+  "rochester_file": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/rochester/RoccoR2018UL.txt"
 }

@@ -78,7 +78,7 @@ def leptonSel(events):
                 tmp2 = tmp2 & eval(cut.replace("[LF_idx]", ""))
             comb = comb & (~tmp1 | tmp2)
         comb = ak.values_astype(comb, bool)
-        muon_col["isTightElectron_" + wp] = ak.where(ele_mask, comb, False)
+        events[("Lepton", "isTightElectron_" + wp)] = ak.where(ele_mask, comb, False)
 
     for wp in MuonWP["TightObjWP"]:
         comb = ak.ones_like(muon_col.pt) == 1.0
@@ -89,6 +89,6 @@ def leptonSel(events):
                 tmp2 = tmp2 & eval(cut.replace("[LF_idx]", ""))
             comb = comb & (~tmp1 | tmp2)
         comb = ak.values_astype(comb, bool)
-        muon_col["isTightMuon_" + wp] = ak.where(~ele_mask, comb, False)
+        events[("Lepton", "isTightMuon_" + wp)] = ak.where(~ele_mask, comb, False)
 
     return events

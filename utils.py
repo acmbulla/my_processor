@@ -28,7 +28,7 @@ cfg = {
         "ecalBadCalibFilter",
         "eeBadScFilter",
     ],
-    "eleWP": "mvaFall17V1Iso_WP90",
+    "eleWP": "mvaFall17V2Iso_WP90",
     "muWP": "cut_Tight_HWWW",
     "puWeightsKey": "Collisions18_UltraLegacy_goldenJSON"
 }
@@ -102,11 +102,25 @@ for key, file_to_copy in zip(keys, files_to_copy):
     proc.wait()
 
 files_to_download = [
-    "https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"
+    "https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt",
 ]
 keys = ["lumiMask"]
 
 basedir = os.path.abspath(".") + "/data/2018/lumimasks/"
+os.makedirs(basedir, exist_ok=True)
+
+for key, file_to_download in zip(keys, files_to_download):
+    fname = basedir + file_to_download.split("/")[-1]
+    cfg[key] = fname
+    with open(fname, "wb") as file:
+        file.write(requests.get(file_to_download).content)
+
+files_to_download = [
+    "https://gpizzati.web.cern.ch/test/roccor/RoccoR2018UL.txt"
+]
+keys = ["rochester_file"]
+
+basedir = os.path.abspath(".") + "/data/2018/rochester/"
 os.makedirs(basedir, exist_ok=True)
 
 for key, file_to_download in zip(keys, files_to_download):
