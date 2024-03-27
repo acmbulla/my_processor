@@ -1,4 +1,6 @@
 condor**
 results**
-data**
+data/*
+!data/common
+!data/cfg.json
 **__py*
