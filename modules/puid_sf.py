@@ -25,7 +25,47 @@ def puid_sf(events, variations, ceval_puid):
     events[("Jet", "PUID_SF")] = sf
     events[("Jet", "PUID_SF_up")] = sf_up
     events[("Jet", "PUID_SF_down")] = sf_down
-    variations["PUID_SF_up"] = (("Jet", "PUID_SF"), ("Jet", "PUID_SF_up"))
-    variations["PUID_SF_down"] = (("Jet", "PUID_SF"), ("Jet", "PUID_SF_down"))
+    variations["PUID_SF_up"] = [
+        (
+            ("Jet", "PUID_SF"),
+            ("Jet", "PUID_SF_up"),
+        ),
+    ]
+    variations["PUID_SF_down"] = [
+        (
+            ("Jet", "PUID_SF"),
+            ("Jet", "PUID_SF_down"),
+        ),
+    ]
 
     return events, variations
+    """
+    originalEvents = events[:]
+
+    for variation in variations.get_variations_for(("Jet", "pt")) + ["nominal"]:
+        events = originalEvents[:]
+        variation_dest, variation_source = variations.get_varied(
+            ("Jet", "pt"), variation
+        )
+        events[variation_dest] = events[variation_source]
+        mask = (
+            jet_genmatched & pass_puId & (15.0 < events.Jet.pt) & (events.Jet.pt < 50.0)
+        )
+        jets = ak.mask(events.Jet, mask)
+        sf = wrap_c(jets.eta, jets.pt, "nom", "L")
+        sf_up = wrap_c(jets.eta, jets.pt, "up", "L")
+        sf_down = wrap_c(jets.eta, jets.pt, "down", "L")
+        # effMC   = wrap_c(jets.eta, jets.pt, "MCEff", "L")
+
+        sf = ak.fill_none(sf, 1.0)
+        sf_up = ak.fill_none(sf_up, 1.0)
+        sf_down = ak.fill_none(sf_down, 1.0)
+
+        events[("Jet", "PUID_SF")] = sf
+        if variation == "nominal":
+            events[("Jet", "PUID_SF_up")] = sf_up
+            events[("Jet", "PUID_SF_down")] = sf_down
+            variations["PUID_SF_up"] = (("Jet", "PUID_SF"), ("Jet", "PUID_SF_up"))
+            variations["PUID_SF_down"] = (("Jet", "PUID_SF"), ("Jet", "PUID_SF_down"))
+
+    """

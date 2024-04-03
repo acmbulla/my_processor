@@ -14,17 +14,17 @@ btag_base_var = [
 ]
 btag_jes_var = [
     "jes",
-    "jesAbsolute",
-    "jesAbsolute_RPLME_YEAR",
-    "jesBBEC1",
-    "jesBBEC1_RPLME_YEAR",
-    "jesEC2",
-    "jesEC2_RPLME_YEAR",
-    "jesFlavorQCD",
-    "jesHF",
-    "jesHF_RPLME_YEAR",
-    "jesRelativeBal",
-    "jesRelativeSample_RPLME_YEAR",
+    # "jesAbsolute",
+    # "jesAbsolute_RPLME_YEAR",
+    # "jesBBEC1",
+    # "jesBBEC1_RPLME_YEAR",
+    # "jesEC2",
+    # "jesEC2_RPLME_YEAR",
+    # "jesFlavorQCD",
+    # "jesHF",
+    # "jesHF_RPLME_YEAR",
+    # "jesRelativeBal",
+    # "jesRelativeSample_RPLME_YEAR",
 ]
 
 
@@ -61,11 +61,14 @@ def btag_sf(events, variations, ceval_btag, cfg):
         )
         btags = ak.fill_none(btags, 1.0)
         events[("Jet", branch_name)] = btags
-        variation_name_nice = ("_").join(variation_name.split("_")[1:])
-        tag = variation_name.split("_")[0]
-        variation_name_nice = f"btag_{variation_name_nice}_{tag}"
-        variations[variation_name_nice] = (
-            ("Jet", "btagSF_deepjet_shape"),
-            ("Jet", branch_name),
-        )
+        if variation_name != "central":
+            variation_name_nice = ("_").join(variation_name.split("_")[1:])
+            tag = variation_name.split("_")[0]
+            variation_name_nice = f"btag_{variation_name_nice}_{tag}"
+            variations[variation_name_nice] = [
+                (
+                    ("Jet", "btagSF_deepjet_shape"),
+                    ("Jet", branch_name),
+                )
+            ]
     return events, variations

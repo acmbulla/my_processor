@@ -47,14 +47,20 @@ def create_datasets():
     for dataset in datasets:
         datasets[dataset]["read_form"] = "mc"
 
+    # DataTrig = {
+    #     "MuonEG": "events.EleMu",
+    #     "DoubleMuon": "(~events.EleMu) & events.DoubleMu",
+    #     "SingleMuon": "(~events.EleMu) & (~events.DoubleMu) & events.SingleMu",
+    #     "EGamma": "(~events.EleMu) & (~events.DoubleMu) & (~events.SingleMu) & (events.SingleEle | events.DoubleEle)",
+    # }
     DataTrig = {
-        "MuonEG": "events.EleMu",
-        "DoubleMuon": "(~events.EleMu) & events.DoubleMu",
-        "SingleMuon": "(~events.EleMu) & (~events.DoubleMu) & events.SingleMu",
-        "EGamma": "(~events.EleMu) & (~events.DoubleMu) & (~events.SingleMu) & (events.SingleEle | events.DoubleEle)",
+        "DoubleMuon": "events.DoubleMu",
+        "SingleMuon": "(~events.DoubleMu) & events.SingleMu",
+        "EGamma":     "(~events.DoubleMu) & (~events.SingleMu) & (events.SingleEle | events.DoubleEle)",
     }
 
-    for dataset in ["DoubleMuon", "EGamma", "MuonEG", "SingleMuon"]:
+    # for dataset in ["DoubleMuon", "EGamma", "MuonEG", "SingleMuon"]:
+    for dataset in ["DoubleMuon", "EGamma", "SingleMuon"]:
         _files = []
         for filesName in [k for k in list(files.keys()) if dataset in k]:
             _files += files[filesName]["files"]

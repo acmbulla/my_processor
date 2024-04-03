@@ -4,3 +4,4 @@ data/*
 !data/common
 !data/cfg.json
 **__py*
+plots**

@@ -47,7 +47,7 @@ def cleanJet(events):
 
         return goodJet_kernel(jets, leptons, ak.ArrayBuilder()).snapshot()
 
-    mask = goodJet_func(events.Jet, events.Lepton)
+    mask = goodJet_func(events.Jet, events.Lepton[events.Lepton.pt >= 10])
     mask = ak.values_astype(mask, bool, including_unknown=True)
 
     events["Jet"] = events.Jet[mask]

@@ -32,14 +32,15 @@
   "eleWP": "mvaFall17V2Iso_WP90",
   "muWP": "cut_Tight_HWWW",
   "puWeightsKey": "Collisions18_UltraLegacy_goldenJSON",
+  "do_theory_variations": false,
   "JME": {
     "jec_stack_names": [
       "Summer19UL18_V5_MC_L1FastJet_AK4PFchs",
       "Summer19UL18_V5_MC_L2Relative_AK4PFchs",
       "Summer19UL18_V5_MC_L3Absolute_AK4PFchs",
       "Summer19UL18_V5_MC_L2L3Residual_AK4PFchs",
-      "Regrouped_Summer19UL18_V5_MC_UncertaintySources_AK4PFchs",
       "Summer19UL18_JRV2_MC_PtResolution_AK4PFchs",
+      "Regrouped_Summer19UL18_V5_MC_UncertaintySources_AK4PFchs",
       "Summer19UL18_JRV2_MC_SF_AK4PFchs"
     ],
     "jec_stack_paths": [
@@ -47,8 +48,8 @@
       "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/jme/Summer19UL18_V5_MC_L2Relative_AK4PFchs.jec.txt",
       "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/jme/Summer19UL18_V5_MC_L3Absolute_AK4PFchs.jec.txt",
       "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/jme/Summer19UL18_V5_MC_L2L3Residual_AK4PFchs.jec.txt",
-      "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/jme/Regrouped_Summer19UL18_V5_MC_UncertaintySources_AK4PFchs.junc.txt",
       "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/jme/Summer19UL18_JRV2_MC_PtResolution_AK4PFchs.jr.txt",
+      "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/jme/Regrouped_Summer19UL18_V5_MC_UncertaintySources_AK4PFchs.junc.txt",
       "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/jme/Summer19UL18_JRV2_MC_SF_AK4PFchs.jrsf.txt"
     ],
     "junc": "Regrouped_Summer19UL18_V5_MC_UncertaintySources_AK4PFchs"
@@ -57,5 +58,8 @@
   "btagSF": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/clib/btagging.json.gz",
   "puWeights": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/clib/puWeights.json.gz",
   "lumiMask": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/lumimasks/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt",
-  "rochester_file": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/rochester/RoccoR2018UL.txt"
+  "rochester_file": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/rochester/RoccoR2018UL.txt",
+  "btagLoose": 0.0490,
+  "btagMedium": 0.2783,
+  "btagTight": 0.7100
 }

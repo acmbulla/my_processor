@@ -8,7 +8,7 @@
     ],
     "python.languageServer": "Pylance",
     "flake8.args": [
-        "--config=setup.cfg"
+        "--config=./setup.cfg"
     ],
     "black-formatter.args": [
         "--config=pyproject.toml"

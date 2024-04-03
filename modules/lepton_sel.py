@@ -42,10 +42,10 @@ def leptonSel(events):
     MuonWP = LeptonSel.MuonWP["Full2018v9"]
 
     ele_mask = abs(events.Lepton.pdgId) == 11
+    mu_mask = abs(events.Lepton.pdgId) == 13
 
     electron_col = events.Electron[ak.mask(events.Lepton.electronIdx, ele_mask)]
-
-    muon_col = events.Muon[ak.mask(events.Lepton.muonIdx, ~ele_mask)]
+    muon_col = events.Muon[ak.mask(events.Lepton.muonIdx, mu_mask)]
 
     for wp in ElectronWP["FakeObjWP"]:
         comb = ak.ones_like(electron_col.pt) == 1.0
@@ -56,7 +56,7 @@ def leptonSel(events):
                 tmp2 = tmp2 & eval(cut.replace("[LF_idx]", ""))
             comb = comb & (~tmp1 | tmp2)
         comb = ak.values_astype(comb, bool)
-        events[("Lepton", "isLoose")] = ak.where(ele_mask, comb, False)
+        events[("Lepton", "ele_isLoose")] = ak.where(ele_mask, comb, False)
 
     for wp in MuonWP["FakeObjWP"]:
         comb = ak.ones_like(muon_col.pt) == 1.0
@@ -67,7 +67,12 @@ def leptonSel(events):
                 tmp2 = tmp2 & eval(cut.replace("[LF_idx]", ""))
             comb = comb & (~tmp1 | tmp2)
         comb = ak.values_astype(comb, bool)
-        events[("Lepton", "isLoose")] = ak.where(~ele_mask, comb, events.Lepton.isLoose)
+        events[("Lepton", "mu_isLoose")] = ak.where(mu_mask, comb, False)
+
+    events[("Lepton", "isLoose")] = ak.values_astype(
+        events.Lepton.ele_isLoose | events.Lepton.mu_isLoose, bool
+    )
+    events[("Lepton", "isLoose")] = ak.fill_none(events.Lepton.isLoose, False)
 
     for wp in ElectronWP["TightObjWP"]:
         comb = ak.ones_like(electron_col.pt) == 1.0
@@ -89,6 +94,6 @@ def leptonSel(events):
                 tmp2 = tmp2 & eval(cut.replace("[LF_idx]", ""))
             comb = comb & (~tmp1 | tmp2)
         comb = ak.values_astype(comb, bool)
-        events[("Lepton", "isTightMuon_" + wp)] = ak.where(~ele_mask, comb, False)
+        events[("Lepton", "isTightMuon_" + wp)] = ak.where(mu_mask, comb, False)
 
     return events

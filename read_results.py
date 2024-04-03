@@ -4,7 +4,9 @@ import cloudpickle
 import zlib
 import matplotlib.pyplot as plt
 
-with open("results/results_merged.pkl", "rb") as file:
+
+pathResults = "/gwdata/users/gpizzati/condor_processor/results"
+with open(f"{pathResults}/results_merged.pkl", "rb") as file:
     results = cloudpickle.loads(zlib.decompress(file.read()))
 
 results = results["results"]
@@ -63,34 +65,53 @@ def renorm(h, xs, sumw):
 
 
 def fold(h):
+    # fold first axis
+    print(h.shape)
     _h = h.copy()
     a = _h.view(True)
-    a.value[1] = a.value[1] + a.value[0]
-    a.value[-2] = a.value[-2] + a.value[-1]
-    a.value[0] = 0
-    a.value[-1] = 0
+
+    a.value[1, :, :] = a.value[1, :, :] + a.value[1, :, :]
+    a.value[0, :, :] = 0
+
+    a.value[-2, :, :] = a.value[-2, :, :] + a.value[-1, :, :]
+    a.value[-1, :, :] = 0
+
+    a.variance[1, :, :] = a.variance[1, :, :] + a.variance[1, :, :]
+    a.variance[0, :, :] = 0
+
+    a.variance[-2, :, :] = a.variance[-2, :, :] + a.variance[-1, :, :]
+    a.variance[-1, :, :] = 0
+
+    # a.value[1] = a.value[1] + a.value[0]
+    # a.value[-2] = a.value[-2] + a.value[-1]
+    # a.value[0] = 0
+    # a.value[-1] = 0
     return _h
 
 
 def get_histo(h, region, variation):
     if variation == "stat":
-        return np.sqrt(h[:, sum, hist.loc(region), hist.loc("nom")].variances())
-    return h[:, sum, hist.loc(region), hist.loc(variation)].values()
+        return np.sqrt(h[:, hist.loc(region), hist.loc("nom")].variances())
+    return h[:, hist.loc(region), hist.loc(variation)].values()
 
 
 def get_variations(h):
-    axis = h.axes[3]
+    axis = h.axes[2]
     variation_names = [axis.value(i) for i in range(len(axis.centers))]
     return variation_names
 
 
 region = "mm"
+variable = "mll"
 histos = {}
 
-mc = 0
-data = 0
-syst_up = 0
-syst_down = 0
+# mc = 0
+# data = 0
+# syst_up = 0
+# syst_down = 0
+
+# sum_data = 0
+# sum_mc = 0
 
 for histoName in datasets:
     for sample in datasets[histoName]["samples"]:
@@ -98,51 +119,89 @@ for histoName in datasets:
             print("Skipping", sample)
             continue
 
-        h = results[sample]["h"]
+        h = results[sample]["h"][variable]
 
         # renorm mcs
         if not datasets[histoName].get("is_data", False):
             h = renorm(h, xss[sample], results[sample]["sumw"])
+            h = fold(h)
+        # sys.exit()
 
-        nom = h[:, sum, hist.loc(region), hist.loc("nom")].copy()
-        nom = fold(nom)
+        # print(h)
+
+        # nom = fold(nom)
+
+        # val = np.sum(nom.values(True))
+
+        # print(sample, val)
+        # if not datasets[histoName].get("is_data", False):
+        #     if isinstance(sum_mc, int):
+        #         sum_mc = val
+        #     else:
+        #         sum_mc += val
+        # else:
+        #     if isinstance(sum_data, int):
+        #         sum_data = val
+        #     else:
+        #         sum_data += val
+        histo = {}
+        variation_names = get_variations(h)
+        for variation_name in variation_names:
+            if variation_name == "nom":
+                continue
+            histo[variation_name] = h[
+                :, hist.loc(region), hist.loc(variation_name)
+            ].values()
+
+        nom = h[:, hist.loc(region), hist.loc("nom")].values()
+        histo["nom"] = nom
+
+        stat = np.sqrt(h[:, hist.loc(region), hist.loc("nom")].variances())
+        histo["stat_up"] = nom + stat
+        histo["stat_down"] = nom - stat
 
         if histoName not in histos:
-            histos[histoName] = nom
+            histos[histoName] = {}  # "nominal": nom.copy()}
+            for vname in histo:
+                histos[histoName][vname] = histo[vname]
         else:
-            print("merging", histoName, sample)
-            histos[histoName] += nom
+            # print("merging", histoName, sample)
+            # histos[histoName]["nominal"] += nom
+            for vname in histo:
+                histos[histoName][vname] += histo[vname]
 
-        if not datasets[histoName].get("is_data", False):
-            if isinstance(mc, int):
-                mc = nom.values()
-            else:
-                mc += nom.values()
-        else:
-            if isinstance(data, int):
-                data = nom.values()
-            else:
-                data += nom.values()
+        # if not datasets[histoName].get("is_data", False):
+        #     if isinstance(mc, int):
+        #         mc = nom.values().copy()
+        #     else:
+        #         mc += nom.values()
+        #     print("merging", "mc", mc)
+        # else:
+        #     if isinstance(data, int):
+        #         data = nom.values().copy()
+        #     else:
+        #         data += nom.values()
+        #     print("merging", "data", data)
 
-        if not datasets[histoName].get("is_data", False):
-            # Stat
-            stat = get_histo(h, region, "stat")
-            syst_up += np.square(stat)
-            syst_down += np.square(stat)
+        # if not datasets[histoName].get("is_data", False):
+        #     # Stat
+        #     stat = get_histo(h, region, "stat")
+        #     stat = h[:, hist.loc(region), hist.loc("nom")]
+        #     syst_up += np.square(stat)
+        #     syst_down += np.square(stat)
 
-            # Syst
-            variation_names = get_variations(h)
-            variation_names = list(
-                filter(lambda k: k.lower().endswith("up"), variation_names)
-            )  # or k.endswith('up')
-            variation_names = list(map(lambda k: k[: -len("_up")], variation_names))
-            print("\n\n")
-            print(variation_names)
-
+        #     # Syst
+        #     variation_names = get_variations(h)
+        #     variation_names = list(
+        #         filter(lambda k: k.lower().endswith("up"), variation_names)
+        #     )  # or k.endswith('up')
+        #     variation_names = list(map(lambda k: k[: -len("_up")], variation_names))
+        #     # print("\n\n")
+        #     # print(variation_names)
 
 print(histos)
-print(data / mc)
-print(np.sqrt(syst_up) / mc)
+
+# print(np.sqrt(syst_up) / mc)
 sys.exit()
 
 mc = 0

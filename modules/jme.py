@@ -35,7 +35,9 @@ def correct_jets(events, variations, jec_stack):
     name_map["JetEta"] = "eta"
     name_map["JetA"] = "area"
 
-    jets = events.Jet
+    jets = ak.with_name(
+        events.Jet, ""
+    )  # Remove Momentum4D methods because will add 'rho'
 
     jets["pt_raw"] = (1 - jets["rawFactor"]) * jets["pt"]
     jets["mass_raw"] = (1 - jets["rawFactor"]) * jets["mass"]
@@ -47,28 +49,47 @@ def correct_jets(events, variations, jec_stack):
     name_map["ptRaw"] = "pt_raw"
     name_map["massRaw"] = "mass_raw"
     name_map["Rho"] = "rho"
+    # jets["_rho"] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, jets.pt)[0]
+    # name_map["Rho"] = (
+    #     "_rho"  # very important! Cannot name it rho otherwise vector will skrew things up
+    # )
 
     jet_factory = CorrectedJetsFactory(name_map, jec_stack)
 
     corrected_jets = jet_factory.build(jets).compute()
 
     br = list(set(ak.fields(corrected_jets)))
-    br = list(filter(lambda k: "JES" in k and "total" not in k.lower(), br))
+    br = list(
+        filter(lambda k: ("JES" in k) or "JER" in k, br)  # and "total" not in k.lower()
+    )
     print(br)
     for variation in br:
         for tag in ["up", "down"]:
-            pt_sort = ak.argsort(corrected_jets[(variation, tag, 'pt')], ascending=False, axis=-1)
-            for variable in ["pt"]:
+            for variable in ["pt", "mass"]:
                 new_branch_name = f"{variable}_{variation}_{tag}"
                 events[("Jet", new_branch_name)] = corrected_jets[
                     (variation, tag, variable)
-                ][pt_sort]
-                variations[f"{variation}_{tag}"] = (
-                    ("Jet", variable),
-                    ("Jet", new_branch_name),
-                )
+                ]
+                variation_key = f"{variation}_{tag}"
+                if variation_key not in variations:
+                    variations[variation_key] = [
+                        (
+                            ("Jet", variable),
+                            ("Jet", new_branch_name),
+                        )
+                    ]
+                else:
+                    variations[variation_key].append(
+                        (
+                            ("Jet", variable),
+                            ("Jet", new_branch_name),
+                        )
+                    )
 
-    events[("Jet", "pt_orig")] = corrected_jets.pt_orig
-    events[("Jet", "pt")] = ak.sort(corrected_jets.pt_jec, ascending=False, axis=-1)
+    # events[("Jet", "pt_orig")] = corrected_jets.pt_orig
+
+    events[("Jet", "pt")] = corrected_jets.pt
+    events[("Jet", "mass")] = corrected_jets.mass
+
     # events[('Jet', 'trueGenJetIdx')] = None
     return events, variations

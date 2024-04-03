@@ -6,11 +6,11 @@ import subprocess
 import cloudpickle
 import zlib
 
-result_files = glob.glob("results/results_job_*.pkl")
+pathResults = "/gwdata/users/gpizzati/condor_processor/results_backup"
+result_files = glob.glob(f"{pathResults}/results_job_*.pkl")
 
 
 def read_results(filename):
-
     with open(filename, "rb") as file:
         results = cloudpickle.loads(zlib.decompress(file.read()))
     return results
@@ -37,11 +37,13 @@ for i, result_file in enumerate(result_files[:]):
 
     errors += result["errors"]
 
-print([results[dataset]["sumw"] for dataset in results])
-print(len(errors))
 for error in errors:
     print(error["dataset"], error["error"])
-write_results("results/results_merged.pkl", {"results": results, "errors": errors})
+
+print([(dataset, results[dataset]["sumw"]) for dataset in results])
+print(len(errors))
+
+write_results(f"{pathResults}/results_merged.pkl", {"results": results, "errors": errors})
 
 sys.exit(1)
 

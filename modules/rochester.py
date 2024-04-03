@@ -16,13 +16,13 @@ def correctRochester(events, is_data, rochester):
     # muons = events.Muon[ak.mask(events.Lepton.muonIdx, mu_mask)]
     muons = events.Muon
     muons["charge"] = muons.pdgId / (-abs(muons.pdgId))
-    muons["genPartIdx"] = ak.mask(muons.genPartIdx, muons.genPartIdx >= 0)
 
     if is_data:
         muSF = rochester.kScaleDT(
             muons["charge"], muons["pt"], muons["eta"], muons["phi"]
         )
     else:
+        muons["genPartIdx"] = ak.mask(muons.genPartIdx, muons.genPartIdx >= 0)
         # if reco pt has corresponding gen pt
         mcSF1 = rochester.kSpreadMC(
             muons["charge"],
