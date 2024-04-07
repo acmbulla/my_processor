@@ -44,6 +44,7 @@ with open("cfg.json") as file:
 ceval_puid = correctionlib.CorrectionSet.from_file(cfg["puidSF"])
 ceval_btag = correctionlib.CorrectionSet.from_file(cfg["btagSF"])
 ceval_puWeight = correctionlib.CorrectionSet.from_file(cfg["puWeights"])
+ceval_lepton_sf = correctionlib.CorrectionSet.from_file(cfg["leptonSF"])
 jec_stack = getJetCorrections(cfg)
 rochester = getRochester(cfg)
 
@@ -112,7 +113,7 @@ def process(events, **kwargs):
         events, variations = trigger_sf(events, variations, cfg)
 
         # add LeptonSF
-        events, variations = lepton_sf(events, variations, cfg)
+        events, variations = lepton_sf(events, variations, ceval_lepton_sf, cfg)
 
         # FIXME add Muon Scale
         # FIXME add Electron Scale

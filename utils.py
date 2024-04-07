@@ -33,6 +33,7 @@ def setup_cfg():
         ],
         "eleWP": "mvaFall17V2Iso_WP90",
         "muWP": "cut_Tight_HWWW",
+        "leptonSF": "/gwpool/users/gpizzati/test_processor/my_processor/data/2018/lepton_sf.json.gz",
         "puWeightsKey": "Collisions18_UltraLegacy_goldenJSON",
         "do_theory_variations": False,
         "btagLoose": 0.0490,
