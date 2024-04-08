@@ -26,6 +26,8 @@ if __name__ == "__main__":
         if "/store/data" in fname:
             if "Run2018B" not in fname:
                 continue
+            if "MuonEG" in fname:
+                continue
             # print(fname)
             do_chunks.append(i)
             continue
@@ -37,8 +39,8 @@ if __name__ == "__main__":
             else:
                 max_chunks[dset] += 1
         do_chunks.append(i)
-    print(max_chunks)
-    print(do_chunks)
+    # print(max_chunks)
+    # print(do_chunks)
     do_chunks = list(set(do_chunks))
 
     # # sys.exit()
@@ -48,6 +50,7 @@ if __name__ == "__main__":
     new_chunks = new_chunks2
 
     print("N chunks", len(new_chunks))
+    print(sorted(list(set(list(map(lambda k: k["dataset"], new_chunks))))))
     chunks_per_job = 20
     # chunks_per_job = 10
     njobs = ceil(len(new_chunks) / chunks_per_job)
@@ -126,6 +129,7 @@ if __name__ == "__main__":
     txtjdl += "error  = $(Folder)/err.txt\n"
     txtjdl += "log    = $(Folder)/log.txt\n"
     txtjdl += "request_cpus=1\n"
+    txtjdl += 'Requirements = (Machine != "pccms04.hcms.it")\n'
     queue = "workday"
     txtjdl += f'+JobFlavour = "{queue}"\n'
 

@@ -1,10 +1,6 @@
 {
   "year": "2018",
   "tgr_data": {
-    "EleMu": [
-      "Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL",
-      "Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"
-    ],
     "DoubleMu": [
       "Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8"
     ],
