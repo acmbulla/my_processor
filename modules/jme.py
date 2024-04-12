@@ -2,6 +2,7 @@ import awkward as ak
 import numpy as np
 from coffea.jetmet_tools import JECStack, CorrectedJetsFactory
 from coffea.lookup_tools import extractor
+import variation as variation_module
 
 
 def getJetCorrections(cfg):
@@ -55,41 +56,83 @@ def correct_jets(events, variations, jec_stack):
     # )
 
     jet_factory = CorrectedJetsFactory(name_map, jec_stack)
+    # FIXME should not apply JER in horns
 
     corrected_jets = jet_factory.build(jets).compute()
 
-    br = list(set(ak.fields(corrected_jets)))
-    br = list(
-        filter(lambda k: ("JES" in k) or "JER" in k, br)  # and "total" not in k.lower()
+    corrected_jets_new = ak.zip({k: jets[k] for k in ["pt_raw", "mass_raw", "eta"]})
+    corrected_jets_new["jec"] = corrected_jets["jet_energy_correction"]
+
+    corrected_jets_new["pt"] = corrected_jets_new.pt_raw * corrected_jets_new.jec
+    corrected_jets_new["mass"] = corrected_jets_new.mass_raw * corrected_jets_new.jec
+
+    no_jer_mask = (
+        (corrected_jets_new.pt < 50)
+        & (abs(corrected_jets_new.eta) >= 2.8)
+        & (abs(corrected_jets_new.eta) <= 3.0)
     )
-    print(br)
-    for variation in br:
+
+    no_jer_mask = corrected_jets_new.pt < 0.0
+
+    corrected_jets_new["jer"] = ak.where(
+        no_jer_mask,
+        1.0,
+        corrected_jets["jet_energy_resolution_correction"],
+    )
+
+    for tag in ["up", "down"]:
+        corrected_jets_new[f"jer_{tag}"] = ak.where(
+            no_jer_mask,
+            1.0,
+            corrected_jets["JER"][tag]["jet_energy_resolution_correction"],
+        )
+
+    corrected_jets_new["pt"] = corrected_jets_new["pt"] * corrected_jets_new["jer"]
+    corrected_jets_new["mass"] = corrected_jets_new["mass"] * corrected_jets_new["jer"]
+
+    variation_names = []
+    for name in ["JER"]:
+        variation_names.append(name)
         for tag in ["up", "down"]:
             for variable in ["pt", "mass"]:
-                new_branch_name = f"{variable}_{variation}_{tag}"
-                events[("Jet", new_branch_name)] = corrected_jets[
-                    (variation, tag, variable)
-                ]
+                corrected_jets_new[f"{variable}_JER_{tag}"] = (
+                    corrected_jets_new[variable]
+                    * corrected_jets_new[f"jer_{tag}"]
+                    / corrected_jets_new["jer"]
+                )
+
+    juncs = jec_stack.junc.getUncertainty(
+        JetEta=corrected_jets_new.eta, JetPt=corrected_jets_new.pt
+    )
+
+    for name, func in juncs:
+        variation_names.append(f"JES_{name}")
+        for itag, tag in zip([0, 1], ["up", "down"]):
+            for variable in ["pt", "mass"]:
+                corrected_jets_new[f"{variable}_JES_{name}_{tag}"] = (
+                    func[:, :, itag] * corrected_jets_new[variable]
+                )
+
+    print(variation_names)
+
+    events[("Jet", "pt")] = corrected_jets_new.pt
+    events[("Jet", "mass")] = corrected_jets_new.mass
+
+    for variation in variation_names:
+        for tag in ["up", "down"]:
+            for variable in ["pt", "mass"]:
+                # new_branch_name = f"{variable}_{variation}_{tag}"
                 variation_key = f"{variation}_{tag}"
-                if variation_key not in variations:
-                    variations[variation_key] = [
-                        (
-                            ("Jet", variable),
-                            ("Jet", new_branch_name),
-                        )
-                    ]
-                else:
-                    variations[variation_key].append(
-                        (
-                            ("Jet", variable),
-                            ("Jet", new_branch_name),
-                        )
-                    )
+                new_branch_name = variation_module.Variation.format_varied_column(
+                    ("Jet", variable), variation_key
+                )
+                # events[new_branch_name] = corrected_jets[(variation, tag, variable)]
+                old_branch_name = f"{variable}_{variation}_{tag}"
+                events[new_branch_name] = corrected_jets_new[old_branch_name]
+                variations.add_columns_for_variation(variation_key, [("Jet", variable)])
 
-    # events[("Jet", "pt_orig")] = corrected_jets.pt_orig
-
-    events[("Jet", "pt")] = corrected_jets.pt
-    events[("Jet", "mass")] = corrected_jets.mass
+    # events[("Jet", "pt")] = corrected_jets.pt
+    # events[("Jet", "mass")] = corrected_jets.mass
 
     # events[('Jet', 'trueGenJetIdx')] = None
     return events, variations

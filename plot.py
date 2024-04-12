@@ -13,7 +13,7 @@ import subprocess
 mpl.use("Agg")
 plt.style.use(hep.style.CMS)
 
-pathResults = "/gwdata/users/gpizzati/condor_processor/results_backup"
+pathResults = "/gwdata/users/gpizzati/condor_processor/results"
 with open(f"{pathResults}/results_merged.pkl", "rb") as file:
     results = cloudpickle.loads(zlib.decompress(file.read()))
 
@@ -23,6 +23,9 @@ results = results["results"]
 xss = {
     "Zjj": 2.78,
     "DY": 6077.22,
+    "DY_inc": 6077.22,
+    "DY_hard": 6077.22,
+    "DY_PU": 6077.22,
     "TTTo2L2Nu": 87.310,
     "ST_t-channel_top": 44.07048,
     "ST_t-channel_antitop": 26.2278,
@@ -52,7 +55,13 @@ datasets = {
         ],
     },
     "DY": {
-        "samples": ["DY"],
+        "samples": ["DY_inc"],
+    },
+    "DY_PU": {
+        "samples": ["DY_PU"],
+    },
+    "DY_hard": {
+        "samples": ["DY_hard"],
     },
     "Zjj": {
         "samples": ["Zjj"],
@@ -97,12 +106,6 @@ def fold(h):
     return _h
 
 
-def get_histo(h, region, variation):
-    if variation == "stat":
-        return np.sqrt(h[:, hist.loc(region), hist.loc("nom")].variances())
-    return h[:, hist.loc(region), hist.loc(variation)].values()
-
-
 def get_variations(h):
     axis = h.axes[1]
     variation_names = [axis.value(i) for i in range(len(axis.centers))]
@@ -112,23 +115,39 @@ def get_variations(h):
 region = "sr_mm"
 variable = "mll"
 regions = ["top_cr", "vv_cr", "sr"]
-regions = ["sr_inc", "sr_0j", "sr_1j", "sr_2j", "sr_geq_2j"]
+#regions = ["sr_inc", "sr_0j", "sr_1j", "sr_2j", "sr_geq_2j"]
+regions = ["sr_inc", "sr_geq_2j"]
 # regions = ["sr_geq_2j"]
 categories = ["ee", "mm"]
 regions = [f"{region}_{category}" for region in regions for category in categories]
 variables = ["mll", "mjj", "ptj1", "ptl1", "detajj"]
 # variables = ["mll", "ptl1", "detall", "ptl2", "ptj1", "ptj2"]
 variables = [
-    "mll",
-    "detall",
-    "ptl1",
-    "ptl2",
-    "ptj1",
-    "ptj2",
     "njet",
+    "njet_50",
+    "mjj",
     "detajj",
     "dphijj",
+    "ptj1",
+    "ptj2",
+    "etaj1",
+    "etaj2",
+    "phij1",
+    "phij2",
+    # leptons
+    "mll",
+    "ptll",
+    "detall",
     "dphill",
+    "ptl1",
+    "ptl2",
+    "etal1",
+    "etal2",
+    "phil1",
+    "phil2",
+    "dR_l1_jets",
+    "dR_l2_jets",
+    "dR_l1_l2"
 ]
 
 print("Start converting histograms")
@@ -140,6 +159,10 @@ for region in regions:
         _histos = {}
         axis = 0
         for histoName in datasets:
+            if 'sr_inc' in region and ('hard' in histoName or 'PU' in histoName):
+                continue
+            if '2j' in region and histoName == 'DY':
+                continue
             for sample in datasets[histoName]["samples"]:
                 if sample not in results:
                     print("Skipping", sample)
@@ -178,6 +201,7 @@ for region in regions:
                 else:
                     for vname in histo:
                         _histos[histoName][vname] += histo[vname]
+        # print(region, _histos.keys())
         histos[region][variable] = {"histos": _histos, "axis": axis}
 
 print("Done converting histograms")
@@ -187,6 +211,8 @@ cmap_petroff = ["#5790fc", "#f89c20", "#e42536", "#964a8b", "#9c9ca1", "#7a21dd"
 colors = {
     "Zjj": cmap_petroff[2],
     "DY": cmap_petroff[0],
+    "DY_hard": cmap_petroff[0],
+    "DY_PU": cmap_petroff[3],
     "Top": cmap_petroff[1],
 }
 
@@ -216,6 +242,8 @@ def plot(_histos, region, variable):
                 continue
             if "JES" in vname and "total" in vname.lower():  # .lower():
                 continue
+            # if "ele_reco" in vname:
+            #     continue
             variation_name = vname[: -len("up")]
 
             nom = histos[histoName]["nom"]
@@ -250,7 +278,7 @@ def plot(_histos, region, variable):
         region, data=True, lumi=round(lumi, 2), ax=ax[0], year="Run-II"
     )  # ,fontsize=16)
     # for i, histoName in enumerate(["Top", "DY", "Zjj", "Data"]):
-    for i, histoName in enumerate(datasets.keys()):
+    for i, histoName in enumerate(histos.keys()):
         y = histos[histoName]["nom"]
         integral = round(np.sum(y), 2)
         if histoName == "Data":
@@ -346,6 +374,8 @@ proc.wait()
 args = []
 for region in regions:
     for variable in variables:
+        # if 'inc' in region:
+        #     continue
         args.append((histos, region, variable))
 
 with Pool(10) as pool:

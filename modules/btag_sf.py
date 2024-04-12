@@ -1,6 +1,6 @@
 from coffea.lookup_tools.correctionlib_wrapper import correctionlib_wrapper
 import awkward as ak
-import variation
+import variation as variation_module
 
 btag_base_var = [
     "lf",
@@ -28,19 +28,20 @@ btag_jes_var = [
 ]
 
 
-@variation.vary(reads_columns=[("Jet", "pt"), ("Jet", "eta")])
+@variation_module.vary(reads_columns=[("Jet", "pt"), ("Jet", "eta")])
 def func(events, variations, ceval_btag, cfg, doVariations: bool = False):
     wrap_c = correctionlib_wrapper(ceval_btag["deepJet_shape"])
+    nominal_branch_name = "btagSF_deepjet_shape"
     if not doVariations:
         variation = "central"
-        branch_name = "btagSF_deepjet_shape"
+        branch_name = nominal_branch_name
         mask = (abs(events.Jet.eta) < 2.5) & (events.Jet.pt > 15.0)
         mask = mask & (
             (events.Jet.hadronFlavour == 0) | (events.Jet.hadronFlavour == 5)
         )
         jets_btag = ak.mask(events.Jet, mask)
         btags = wrap_c(
-            variation_name,
+            variation,
             jets_btag.hadronFlavour,
             abs(jets_btag.eta),
             jets_btag.pt,
@@ -50,15 +51,27 @@ def func(events, variations, ceval_btag, cfg, doVariations: bool = False):
         events[("Jet", branch_name)] = btags
     else:
         branch_names = []
+        clib_variation_names = []
         variation_names = []
+        branch_name = nominal_branch_name
         for variation in btag_base_var + btag_jes_var:
             variation = variation.replace("RPLME_YEAR", cfg["year"])
-            branch_name = "btagSF_deepjet_shape"
             for tag in ["up", "down"]:
-                variation_names.append(tag + "_" + variation)
-                branch_names.append(branch_name + "_" + variation + "_" + tag)
+                # used to access correctionlib
+                clib_variation_names.append(tag + "_" + variation)
 
-        for branch_name, variation_name in zip(branch_names, variation_names):
+                # the name that will be registered for the variation
+                # FIXME cannot see tag
+                variation_name_nice = f"btag_{variation}_{tag}"
+                variation_names.append(variation_name_nice)
+                varied_branch_name = variation_module.Variation.format_varied_column(
+                    ("Jet", branch_name), variation_names[-1]
+                )
+                branch_names.append(varied_branch_name)
+
+        for branch_name, clib_name, variation_name in zip(
+            branch_names, clib_variation_names, variation_names
+        ):
             mask = (abs(events.Jet.eta) < 2.5) & (events.Jet.pt > 15.0)
             if "cferr" in variation_name:
                 mask = mask & (events.Jet.hadronFlavour == 4)
@@ -68,23 +81,15 @@ def func(events, variations, ceval_btag, cfg, doVariations: bool = False):
                 )
             jets_btag = ak.mask(events.Jet, mask)
             btags = wrap_c(
-                variation_name,
+                clib_name,
                 jets_btag.hadronFlavour,
                 abs(jets_btag.eta),
                 jets_btag.pt,
                 jets_btag.btagDeepFlavB,
             )
             btags = ak.fill_none(btags, 1.0)
-            events[("Jet", branch_name)] = btags
-            variation_name_nice = ("_").join(variation_name.split("_")[1:])
-            tag = variation_name.split("_")[0]
-            variation_name_nice = f"btag_{variation_name_nice}_{tag}"
-            variations[variation_name_nice] = [
-                (
-                    ("Jet", "btagSF_deepjet_shape"),
-                    ("Jet", branch_name),
-                )
-            ]
+            events[branch_name] = btags
+            variations.register_variation([('Jet', nominal_branch_name)], variation_name)
     return events, variations
 
 

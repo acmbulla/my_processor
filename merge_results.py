@@ -6,7 +6,7 @@ import subprocess
 import cloudpickle
 import zlib
 
-pathResults = "/gwdata/users/gpizzati/condor_processor/results_backup"
+pathResults = "/gwdata/users/gpizzati/condor_processor/results"
 result_files = glob.glob(f"{pathResults}/results_job_*.pkl")
 
 

@@ -81,7 +81,8 @@ class Variation:
             _description_
         """
         if variation_name not in self.variations_dict:
-            raise Exception(f"Variation '{variation_name}' not yet defined")
+            # raise Exception(f"Variation '{variation_name}' not yet defined")
+            self.register_variation(columns, variation_name, format_rule)
         for column in columns:
             self.variations_dict[variation_name].append(
                 (
@@ -178,9 +179,9 @@ def vary(reads_columns: type[str | list[str]] = "all"):
             doVariations: bool = False,
             **kwargs,
         ):
-            print(events)
-            print(variations)
-            print(*args)
+            # print(events)
+            # print(variations)
+            # print(*args)
             if doVariations:
                 # since func will create varied columns, just run on nominal
                 return func(
@@ -194,7 +195,7 @@ def vary(reads_columns: type[str | list[str]] = "all"):
                 # Save all current variations, will loop over them callind the function
 
                 original_fields = get_columns(events)
-                print(original_fields)
+                # print(original_fields)
 
                 # Run the nominal
                 new_events, _ = func(
@@ -203,10 +204,10 @@ def vary(reads_columns: type[str | list[str]] = "all"):
                 new_variations = deepcopy(variations)
 
                 nom_fields = get_columns(new_events)
-                print(nom_fields)
+                # print(nom_fields)
                 new_fields = list(set(nom_fields).difference(original_fields))
-                print(new_fields)
-                print(variations.get_variations_affecting(reads_columns))
+                # print(new_fields)
+                # print(variations.get_variations_affecting(reads_columns))
                 for variation in variations.get_variations_affecting(reads_columns):
                     events = ak.copy(originalEvents)
 
@@ -222,10 +223,15 @@ def vary(reads_columns: type[str | list[str]] = "all"):
 
                     # copy all the varied columns here
                     for new_field in new_fields:
-                        print("registering new field", new_field)
                         varied_field = Variation.format_varied_column(
-                            variation, new_field
+                            new_field, variation
                         )
+                        # print(
+                        #     "registering new field",
+                        #     new_field,
+                        #     "with varied name",
+                        #     varied_field,
+                        # )
                         new_events[varied_field] = ak.copy(varied_events[new_field])
                     # and register them
                     new_variations.add_columns_for_variation(variation, new_fields)
