@@ -42,12 +42,12 @@ print("coffea version", coffea.__version__)
 with open("cfg.json") as file:
     cfg = json.load(file)
 
-ceval_puid = correctionlib.CorrectionSet.from_file(cfg["puidSF"])
-ceval_btag = correctionlib.CorrectionSet.from_file(cfg["btagSF"])
-ceval_puWeight = correctionlib.CorrectionSet.from_file(cfg["puWeights"])
-ceval_lepton_sf = correctionlib.CorrectionSet.from_file(cfg["leptonSF"])
-jec_stack = getJetCorrections(cfg)
-rochester = getRochester(cfg)
+# ceval_puid = correctionlib.CorrectionSet.from_file(cfg["puidSF"])
+# ceval_btag = correctionlib.CorrectionSet.from_file(cfg["btagSF"])
+# ceval_puWeight = correctionlib.CorrectionSet.from_file(cfg["puWeights"])
+# ceval_lepton_sf = correctionlib.CorrectionSet.from_file(cfg["leptonSF"])
+# jec_stack = getJetCorrections(cfg)
+# rochester = getRochester(cfg)
 
 
 def process(events, **kwargs):
@@ -55,8 +55,6 @@ def process(events, **kwargs):
     trigger_sel = kwargs.get("trigger_sel", "")
     isData = kwargs.get("is_data", False)
 
-    # variations = {}
-    # variations["nom"] = [()]
     variations = variation_module.Variation()
     variations.register_variation([], "nom")
 
@@ -109,17 +107,17 @@ def process(events, **kwargs):
     # Should load SF and corrections here
 
     # Correct Muons with rochester
-    events = correctRochester(events, isData, rochester)
+    # events = correctRochester(events, isData, rochester)
 
     if not isData:
         # puWeight
-        events, variations = puweight_sf(events, variations, ceval_puWeight, cfg)
+        # events, variations = puweight_sf(events, variations, ceval_puWeight, cfg)
 
         # add trigger SF
-        events, variations = trigger_sf(events, variations, cfg)
+        # events, variations = trigger_sf(events, variations, cfg)
 
         # add LeptonSF
-        events, variations = lepton_sf(events, variations, ceval_lepton_sf, cfg)
+        # events, variations = lepton_sf(events, variations, ceval_lepton_sf, cfg)
 
         # FIXME add Electron Scale
         # FIXME add MET corrections?
@@ -127,10 +125,10 @@ def process(events, **kwargs):
         # Jets corrections
 
         # JEC + JER + JES
-        events, variations = correct_jets(events, variations, jec_stack)
+        # events, variations = correct_jets(events, variations, jec_stack)
 
         # puId SF
-        events, variations = puid_sf(events, variations, ceval_puid)
+        # events, variations = puid_sf(events, variations, ceval_puid)
 
         # btag SF
         events, variations = btag_sf(events, variations, ceval_btag, cfg)
@@ -187,7 +185,7 @@ def process(events, **kwargs):
 
     default_axis = [
         hist.axis.StrCategory(
-            [f"{region}_{category}" for region in regions for category in ["ee", "mm"]],
+            [f"{region}" for region in regions],
             name="category",
         ),
         hist.axis.StrCategory(
@@ -239,16 +237,16 @@ def process(events, **kwargs):
         # l2tight
         events = events[(ak.num(events.Lepton, axis=1) >= 2)]
 
-        eleWP = cfg["eleWP"]
-        muWP = cfg["muWP"]
+        # eleWP = cfg["eleWP"]
+        # muWP = cfg["muWP"]
 
-        comb = ak.ones_like(events.run) == 1.0
-        for ilep in range(2):
-            comb = comb & (
-                events.Lepton[:, ilep]["isTightElectron_" + eleWP]
-                | events.Lepton[:, ilep]["isTightMuon_" + muWP]
-            )
-        events = events[comb]
+        # comb = ak.ones_like(events.run) == 1.0
+        # for ilep in range(2):
+        #     comb = comb & (
+        #         events.Lepton[:, ilep]["isTightElectron_" + eleWP]
+        #         | events.Lepton[:, ilep]["isTightMuon_" + muWP]
+        #     )
+        # events = events[comb]
 
         # Jet real selections
 
@@ -258,15 +256,15 @@ def process(events, **kwargs):
 
         events['ptj1_check'] = ak.fill_none(ak.pad_none(events.Jet.pt, 1)[:, 0], -9999)
 
-        events["Jet"] = events.Jet[events.Jet.pt >= 30]
+        # events["Jet"] = events.Jet[events.Jet.pt >= 30]
         # events = events[(ak.num(events.Jet[events.Jet.pt >= 30], axis=1) >= 2)]
         events["njet"] = ak.num(events.Jet, axis=1)
         events["njet_50"] = ak.num(events.Jet[events.Jet.pt >= 50], axis=1)
         # Define categories
 
-        events["ee"] = (
-            events.Lepton[:, 0].pdgId * events.Lepton[:, 1].pdgId
-        ) == -11 * 11
+        # events["ee"] = (
+        #     events.Lepton[:, 0].pdgId * events.Lepton[:, 1].pdgId
+        # ) == -11 * 11
         events["mm"] = (
             events.Lepton[:, 0].pdgId * events.Lepton[:, 1].pdgId
         ) == -13 * 13
@@ -279,7 +277,8 @@ def process(events, **kwargs):
             ]
 
         # Analysis level cuts
-        leptoncut = events.ee | events.mm
+        # leptoncut = events.ee | events.mm
+        leptoncut = events.mm
 
         # third lepton veto
         leptoncut = leptoncut & (
@@ -381,14 +380,14 @@ def process(events, **kwargs):
         # regions["top_cr"] = events.bTag & (abs(events.mll - 91) >= 15)
         # regions["vv_cr"] = events.bVeto & (abs(events.mll - 91) >= 15)
         # regions["sr"] = events.bVeto & (abs(events.mll - 91) < 15)
-        regions["sr_inc"] = abs(events.mll - 91) < 15
+        regions["sr_inc"] = abs(events.mll - 125) < 30
         # regions["sr_0j"] = (abs(events.mll - 91) < 15) & (events.njet == 0)
         # regions["sr_1j"] = (abs(events.mll - 91) < 15) & (events.njet == 1)
         # regions["sr_2j"] = (abs(events.mll - 91) < 15) & (events.njet == 2)
         # regions["sr_geq_1j"] = (abs(events.mll - 91) < 15) & (events.njet >= 1)
-        regions["sr_geq_2j"] = (abs(events.mll - 91) < 15) & (events.njet >= 2)
-        regions["sr_geq_2j_bveto"] = (abs(events.mll - 91) < 15) & (events.njet >= 2)
-        regions["sr_geq_2j_btag"] = (abs(events.mll - 91) < 15) & (events.njet >= 2)
+        regions["sr_geq_2j"] = (abs(events.mll - 125) < 30) & (events.njet >= 2)
+        regions["sr_geq_2j_bveto"] = (abs(events.mll - 125) < 30) & (events.njet >= 2)
+        regions["sr_geq_2j_btag"] = (abs(events.mll - 125) < 30) & (events.njet >= 2)
         btag_regions["sr_geq_2j_bveto"] = "bVeto"
         btag_regions["sr_geq_2j_btag"] = "bTag"
 
@@ -412,43 +411,42 @@ def process(events, **kwargs):
             events["DY_hard"] = gen_mask & both_jets_gen_matched
             events["DY_PU"] = gen_mask & ~both_jets_gen_matched
             events["DY_inc"] = gen_mask & events[dataset]
-            # DY ptll reweight
-            ceval_ptll = correctionlib.CorrectionSet.from_file(
-                "/gwpool/users/gpizzati/test_processor/my_processor/data/ptll_dy_rwgt.json.gz"
-            )
-            events["rwgt_ptll_ee"] = ceval_ptll["ptll_rwgt_dy_ee"].evaluate(events.ptll)
-            events["rwgt_ptll_mm"] = ceval_ptll["ptll_rwgt_dy_mm"].evaluate(events.ptll)
-            events["weight"] = events.weight * ak.where(
-                events.ee, events.rwgt_ptll_ee, events.rwgt_ptll_mm
-            )
+            # # DY ptll reweight
+            # ceval_ptll = correctionlib.CorrectionSet.from_file(
+            #     "/gwpool/users/gpizzati/test_processor/my_processor/data/ptll_dy_rwgt.json.gz"
+            # )
+            # events["rwgt_ptll_ee"] = ceval_ptll["ptll_rwgt_dy_ee"].evaluate(events.ptll)
+            # events["rwgt_ptll_mm"] = ceval_ptll["ptll_rwgt_dy_mm"].evaluate(events.ptll)
+            # events["weight"] = events.weight * ak.where(
+            #     events.ee, events.rwgt_ptll_ee, events.rwgt_ptll_mm
+            # )
 
         # Fill histograms
         for dataset_name in results:
             for region in regions:
-                for category in ["ee", "mm"]:
-                    # Apply mask for specific region, category and dataset_name
-                    mask = regions[region] & events[category] & events[dataset_name]
+                # Apply mask for specific region, category and dataset_name
+                mask = regions[region] & events[category] & events[dataset_name]
 
-                    if not isData:
-                        # Renorm for btag in region
-                        sumw_before_btagsf = ak.sum(events[mask].weight)
-                        events["weight_btag"] = events.weight * events.btagSF
-                        sumw_after_btagsf = ak.sum(events[mask].weight_btag)
-                        btag_norm = sumw_before_btagsf / sumw_after_btagsf
-                        # print(dataset_name, region, cat, 'btag norm', btag_norm)
-                        events["weight_btag"] = events.weight_btag * btag_norm
-                    else:
-                        events["weight_btag"] = events.weight
+                if not isData:
+                    # Renorm for btag in region
+                    sumw_before_btagsf = ak.sum(events[mask].weight)
+                    events["weight_btag"] = events.weight * events.btagSF
+                    sumw_after_btagsf = ak.sum(events[mask].weight_btag)
+                    btag_norm = sumw_before_btagsf / sumw_after_btagsf
+                    # print(dataset_name, region, cat, 'btag norm', btag_norm)
+                    events["weight_btag"] = events.weight_btag * btag_norm
+                else:
+                    events["weight_btag"] = events.weight
 
-                    btag_cut = btag_regions.get(region, dataset_name)
-                    mask = mask & events[btag_cut]
-                    for variable in histos:
-                        results[dataset_name]["h"][variable].fill(
-                            events[variable][mask],
-                            category=f"{region}_{category}",
-                            syst=variation,
-                            weight=events.weight_btag[mask],
-                        )
+                btag_cut = btag_regions.get(region, dataset_name)
+                mask = mask & events[btag_cut]
+                for variable in histos:
+                    results[dataset_name]["h"][variable].fill(
+                        events[variable][mask],
+                        category=f"{region}",
+                        syst=variation,
+                        weight=events.weight_btag[mask],
+                    )
 
     return results
 

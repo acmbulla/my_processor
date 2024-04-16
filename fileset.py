@@ -7,83 +7,83 @@ import dask
 def get_files():
     Samples = {}
 
-    Samples["DoubleMuon_Run2018A-UL2018-v1"] = {
-        "nanoAOD": "/DoubleMuon/Run2018A-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
-    }
-    Samples["DoubleMuon_Run2018B-UL2018-v2"] = {
-        "nanoAOD": "/DoubleMuon/Run2018B-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
-    }
-    Samples["DoubleMuon_Run2018C-UL2018-v1"] = {
-        "nanoAOD": "/DoubleMuon/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
-    }
-    Samples["DoubleMuon_Run2018D-UL2018-v2"] = {
-        "nanoAOD": "/DoubleMuon/Run2018D-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD"
-    }
+    # Samples["DoubleMuon_Run2018A-UL2018-v1"] = {
+    #     "nanoAOD": "/DoubleMuon/Run2018A-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+    # }
+    # Samples["DoubleMuon_Run2018B-UL2018-v2"] = {
+    #     "nanoAOD": "/DoubleMuon/Run2018B-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+    # }
+    # Samples["DoubleMuon_Run2018C-UL2018-v1"] = {
+    #     "nanoAOD": "/DoubleMuon/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+    # }
+    # Samples["DoubleMuon_Run2018D-UL2018-v2"] = {
+    #     "nanoAOD": "/DoubleMuon/Run2018D-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD"
+    # }
 
-    Samples["EGamma_Run2018A-UL2018-v1"] = {
-        "nanoAOD": "/EGamma/Run2018A-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
-    }
-    Samples["EGamma_Run2018B-UL2018-v1"] = {
-        "nanoAOD": "/EGamma/Run2018B-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
-    }
-    Samples["EGamma_Run2018C-UL2018-v1"] = {
-        "nanoAOD": "/EGamma/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
-    }
-    Samples["EGamma_Run2018D-UL2018-v1"] = {
-        "nanoAOD": "/EGamma/Run2018D-UL2018_MiniAODv2_NanoAODv9-v3/NANOAOD"
-    }
+    # Samples["EGamma_Run2018A-UL2018-v1"] = {
+    #     "nanoAOD": "/EGamma/Run2018A-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+    # }
+    # Samples["EGamma_Run2018B-UL2018-v1"] = {
+    #     "nanoAOD": "/EGamma/Run2018B-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+    # }
+    # Samples["EGamma_Run2018C-UL2018-v1"] = {
+    #     "nanoAOD": "/EGamma/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+    # }
+    # Samples["EGamma_Run2018D-UL2018-v1"] = {
+    #     "nanoAOD": "/EGamma/Run2018D-UL2018_MiniAODv2_NanoAODv9-v3/NANOAOD"
+    # }
 
-    Samples["MuonEG_Run2018A-UL2018-v1"] = {
-        "nanoAOD": "/MuonEG/Run2018A-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
-    }
-    Samples["MuonEG_Run2018B-UL2018-v1"] = {
-        "nanoAOD": "/MuonEG/Run2018B-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
-    }
-    Samples["MuonEG_Run2018C-UL2018-v1"] = {
-        "nanoAOD": "/MuonEG/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
-    }
-    Samples["MuonEG_Run2018D-UL2018-v1"] = {
-        "nanoAOD": "/MuonEG/Run2018D-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
-    }
+    # Samples["MuonEG_Run2018A-UL2018-v1"] = {
+    #     "nanoAOD": "/MuonEG/Run2018A-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+    # }
+    # Samples["MuonEG_Run2018B-UL2018-v1"] = {
+    #     "nanoAOD": "/MuonEG/Run2018B-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+    # }
+    # Samples["MuonEG_Run2018C-UL2018-v1"] = {
+    #     "nanoAOD": "/MuonEG/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+    # }
+    # Samples["MuonEG_Run2018D-UL2018-v1"] = {
+    #     "nanoAOD": "/MuonEG/Run2018D-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+    # }
 
-    Samples["SingleMuon_Run2018A-UL2018-v2"] = {
-        "nanoAOD": "/SingleMuon/Run2018A-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD"
-    }
-    Samples["SingleMuon_Run2018B-UL2018-v2"] = {
-        "nanoAOD": "/SingleMuon/Run2018B-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD"
-    }
-    Samples["SingleMuon_Run2018C-UL2018-v2"] = {
-        "nanoAOD": "/SingleMuon/Run2018C-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD"
-    }
-    Samples["SingleMuon_Run2018D-UL2018-v1"] = {
-        "nanoAOD": "/SingleMuon/Run2018D-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
-    }
+    # Samples["SingleMuon_Run2018A-UL2018-v2"] = {
+    #     "nanoAOD": "/SingleMuon/Run2018A-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD"
+    # }
+    # Samples["SingleMuon_Run2018B-UL2018-v2"] = {
+    #     "nanoAOD": "/SingleMuon/Run2018B-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD"
+    # }
+    # Samples["SingleMuon_Run2018C-UL2018-v2"] = {
+    #     "nanoAOD": "/SingleMuon/Run2018C-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD"
+    # }
+    # Samples["SingleMuon_Run2018D-UL2018-v1"] = {
+    #     "nanoAOD": "/SingleMuon/Run2018D-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+    # }
 
     Samples["DYJetsToLL_M-50"] = {
-        "nanoAOD": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM"
+        "nanoAOD": "/DYJetsToLL_M-50_TuneCP5_13p6TeV-madgraphMLM-pythia8/Run3Summer22NanoAODv12-forPOG_130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM"
     }
-    Samples["EWKZ2Jets_ZToLL_M-50_MJJ-120"] = {
-        "nanoAOD": "/EWK_LLJJ_MLL-50_MJJ-120_TuneCP5_13TeV-madgraph-pythia8_dipole/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM"
+    Samples["HtoMuMu"] = {
+        "nanoAOD": "/GluGluHto2Mu_M-125_TuneCP5_13p6TeV_powheg-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v3/NANOAODSIM"
     }
 
-    Samples["ST_tW_top"] = {
-        "nanoAOD": "/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM"
-    }
-    Samples["ST_tW_antitop"] = {
-        "nanoAOD": "/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM"
-    }
-    Samples["ST_t-channel_antitop"] = {
-        "nanoAOD": "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM"
-    }
-    Samples["ST_t-channel_top"] = {
-        "nanoAOD": "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM"
-    }
-    Samples["ST_s-channel"] = {
-        "nanoAOD": "/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM"
-    }
-    Samples["TTTo2L2Nu"] = {
-        "nanoAOD": "/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM"
-    }
+    # Samples["ST_tW_top"] = {
+    #     "nanoAOD": "/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM"
+    # }
+    # Samples["ST_tW_antitop"] = {
+    #     "nanoAOD": "/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM"
+    # }
+    # Samples["ST_t-channel_antitop"] = {
+    #     "nanoAOD": "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM"
+    # }
+    # Samples["ST_t-channel_top"] = {
+    #     "nanoAOD": "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM"
+    # }
+    # Samples["ST_s-channel"] = {
+    #     "nanoAOD": "/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM"
+    # }
+    # Samples["TTTo2L2Nu"] = {
+    #     "nanoAOD": "/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM"
+    # }
 
     files = {}
     for sampleName in Samples:
@@ -135,9 +135,9 @@ def get_cluster(local=True):
                 "when_to_transfer_output": "ON_EXIT",
             },
             job_script_prologue=[
-                "export PATH=/gwpool/users/gpizzati/mambaforge/bin:$PATH",
-                "mamba activate test_uproot",
-                "export X509_USER_PROXY=/gwpool/users/gpizzati/.proxy",
+                "export PATH=/afs/cern.ch/user/a/abulla/my_processor/myenv/bin:$PATH",
+                "export PYTHONPATH=/afs/cern.ch/user/a/abulla/my_processor/myenv/lib64/python3.9/site-packages:$PYTHONPATH"
+                "export X509_USER_PROXY=/afs/cern.ch/user/a/abulla/.proxy",
                 "export XRD_RUNFORKHANDLER=1",
             ],
         )
@@ -157,7 +157,7 @@ def get_cluster(local=True):
 
 
 if __name__ == "__main__":
-    cluster = get_cluster(local=False)
+    cluster = get_cluster(local=True)
 
     client = cluster.get_client()
     client.wait_for_workers(10)

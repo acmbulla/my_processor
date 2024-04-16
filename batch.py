@@ -61,12 +61,12 @@ def split_chunks(l, n):
 }
 """
 if __name__ == "__main__":
-    machines = [
-        "pccms04.hcms.it",
-        "pccms08.hcms.it",
-        "pccms12.hcms.it",
-        "pccms14.hcms.it",
-    ]
+    # machines = [
+    #     "pccms04.hcms.it",
+    #     "pccms08.hcms.it",
+    #     "pccms12.hcms.it",
+    #     "pccms14.hcms.it",
+    # ]
     with open("data/common/forms.json", "r") as file:
         forms = json.load(file)
     with open("data/chunks.json", "r") as file:
@@ -182,7 +182,7 @@ if __name__ == "__main__":
 
     folders = []
     pathPython = os.path.abspath(".")
-    pathResults = "/gwdata/users/gpizzati/condor_processor"
+    pathResults = "/eos/user/a/abulla/HiggsMuMu"
 
     proc = subprocess.Popen(
         f"rm -r condor_backup {pathResults}/results_backup; mv condor condor_backup; mv {pathResults}/results {pathResults}/results_backup",
@@ -207,13 +207,13 @@ if __name__ == "__main__":
     proc.wait()
 
     txtsh = "#!/bin/bash\n"
-    txtsh += "export X509_USER_PROXY=/gwpool/users/gpizzati/.proxy\n"
+    txtsh += "export X509_USER_PROXY=/afs/cern.ch/user/a/abulla/.proxy\n"
 
-    txtsh += "source /gwpool/users/gpizzati/mambaforge/etc/profile.d/conda.sh\n"
-    txtsh += "source /gwpool/users/gpizzati/mambaforge/etc/profile.d/mamba.sh\n"
-    txtsh += "mamba activate test_uproot\n"
+    txtsh += "source /afs/cern.ch/user/a/abulla/my_processor/start.sh\n"
+    # txtsh += "source /gwpool/users/gpizzati/mambaforge/etc/profile.d/mamba.sh\n"
+    # txtsh += "mamba activate test_uproot\n"
 
-    txtsh += f"export PYTHONPATH={pathPython}:$PYTHONPATH\n"
+    # txtsh += f"export PYTHONPATH={pathPython}:$PYTHONPATH\n"
     txtsh += "echo 'which python'\n"
     txtsh += "which python\n"
     txtsh += "time python script_worker.py\n"
@@ -240,11 +240,11 @@ if __name__ == "__main__":
     txtjdl += "error  = $(Folder)/err.txt\n"
     txtjdl += "log    = $(Folder)/log.txt\n"
     txtjdl += "request_cpus=1\n"
-    txtjdl += (
-        "Requirements = "
-        + " || ".join([f'(machine == "{machine}")' for machine in machines])
-        + "\n"
-    )
+    # txtjdl += (
+    #     "Requirements = "
+    #     + " || ".join([f'(machine == "{machine}")' for machine in machines])
+    #     + "\n"
+    # )
     # txtjdl += 'Requirements = (machine == "pccms03.hcms.it") || (machine == "pccms04.hcms.it") || (machine == "pccms14.hcms.it")\n'
     queue = "workday"
     txtjdl += f'+JobFlavour = "{queue}"\n'

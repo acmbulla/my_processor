@@ -10,66 +10,66 @@ def create_datasets():
         files = json.load(file)
 
     datasets = {
-        "Zjj": {
-            "files": files["EWKZ2Jets_ZToLL_M-50_MJJ-120"]["files"][:],
-            "xs": 1.719,
+        "HtoMuMu": {
+            "files": files["HtoMuMu"]["files"][:],
+            "xs": 0.01133696,
         },
         "DY": {
             "files": files["DYJetsToLL_M-50"]["files"][:],
-            "xs": 6077.22,
+            "xs": 7034.80544,
         },
-        "TTTo2L2Nu": {
-            "files": files["TTTo2L2Nu"]["files"][:],
-            "xs": 10,
-        },
-        "ST_s-channel": {
-            "files": files["ST_s-channel"]["files"][:],
-            "xs": 10,
-        },
-        "ST_t-channel_top": {
-            "files": files["ST_t-channel_top"]["files"][:],
-            "xs": 10,
-        },
-        "ST_t-channel_antitop": {
-            "files": files["ST_t-channel_antitop"]["files"][:],
-            "xs": 10,
-        },
-        "ST_tW_antitop": {
-            "files": files["ST_tW_antitop"]["files"][:],
-            "xs": 10,
-        },
-        "ST_tW_top": {
-            "files": files["ST_tW_top"]["files"][:],
-            "xs": 10,
-        },
+        # "TTTo2L2Nu": {
+        #     "files": files["TTTo2L2Nu"]["files"][:],
+        #     "xs": 10,
+        # },
+        # "ST_s-channel": {
+        #     "files": files["ST_s-channel"]["files"][:],
+        #     "xs": 10,
+        # },
+        # "ST_t-channel_top": {
+        #     "files": files["ST_t-channel_top"]["files"][:],
+        #     "xs": 10,
+        # },
+        # "ST_t-channel_antitop": {
+        #     "files": files["ST_t-channel_antitop"]["files"][:],
+        #     "xs": 10,
+        # },
+        # "ST_tW_antitop": {
+        #     "files": files["ST_tW_antitop"]["files"][:],
+        #     "xs": 10,
+        # },
+        # "ST_tW_top": {
+        #     "files": files["ST_tW_top"]["files"][:],
+        #     "xs": 10,
+        # },
     }
 
     for dataset in datasets:
         datasets[dataset]["read_form"] = "mc"
 
+    # # DataTrig = {
+    # #     "MuonEG": "events.EleMu",
+    # #     "DoubleMuon": "(~events.EleMu) & events.DoubleMu",
+    # #     "SingleMuon": "(~events.EleMu) & (~events.DoubleMu) & events.SingleMu",
+    # #     "EGamma": "(~events.EleMu) & (~events.DoubleMu) & (~events.SingleMu) & (events.SingleEle | events.DoubleEle)",
+    # # }
     # DataTrig = {
-    #     "MuonEG": "events.EleMu",
-    #     "DoubleMuon": "(~events.EleMu) & events.DoubleMu",
-    #     "SingleMuon": "(~events.EleMu) & (~events.DoubleMu) & events.SingleMu",
-    #     "EGamma": "(~events.EleMu) & (~events.DoubleMu) & (~events.SingleMu) & (events.SingleEle | events.DoubleEle)",
+    #     "DoubleMuon": "events.DoubleMu",
+    #     "SingleMuon": "(~events.DoubleMu) & events.SingleMu",
+    #     "EGamma":     "(~events.DoubleMu) & (~events.SingleMu) & (events.SingleEle | events.DoubleEle)",
     # }
-    DataTrig = {
-        "DoubleMuon": "events.DoubleMu",
-        "SingleMuon": "(~events.DoubleMu) & events.SingleMu",
-        "EGamma":     "(~events.DoubleMu) & (~events.SingleMu) & (events.SingleEle | events.DoubleEle)",
-    }
 
-    # for dataset in ["DoubleMuon", "EGamma", "MuonEG", "SingleMuon"]:
-    for dataset in ["DoubleMuon", "EGamma", "SingleMuon"]:
-        _files = []
-        for filesName in [k for k in list(files.keys()) if dataset in k]:
-            _files += files[filesName]["files"]
-        datasets[dataset] = {
-            "files": _files,
-            "trigger_sel": DataTrig[dataset],
-            "read_form": "data",
-            "is_data": True,
-        }
+    # # for dataset in ["DoubleMuon", "EGamma", "MuonEG", "SingleMuon"]:
+    # for dataset in ["DoubleMuon", "EGamma", "SingleMuon"]:
+    #     _files = []
+    #     for filesName in [k for k in list(files.keys()) if dataset in k]:
+    #         _files += files[filesName]["files"]
+    #     datasets[dataset] = {
+    #         "files": _files,
+    #         "trigger_sel": DataTrig[dataset],
+    #         "read_form": "data",
+    #         "is_data": True,
+    #     }
 
     return datasets
 
